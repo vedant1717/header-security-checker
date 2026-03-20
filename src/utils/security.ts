@@ -100,6 +100,33 @@ const SECURITY_HEADERS = [
       if (!val) return { name: 'Permissions-Policy', value: val, status: 'warning', description: 'Controls access to browser features.', recommendation: 'Restrict features like geolocation, microphone, and camera if not needed.' };
       return { name: 'Permissions-Policy', value: val, status: 'secure', description: 'Permissions-Policy is implemented.' };
     }
+  },
+  {
+    name: 'Access-Control-Allow-Origin',
+    description: 'Specifies which domains can access the resources on this server (CORS).',
+    evaluate: (val: string | null): HeaderResult => {
+      if (!val) return { name: 'Access-Control-Allow-Origin', value: val, status: 'info', description: 'CORS is not explicitly configured.', recommendation: 'If this is an API, configure CORS to restrict access to trusted domains.' };
+      if (val === '*') return { name: 'Access-Control-Allow-Origin', value: val, status: 'warning', description: 'Wildcard allows any domain to access resources.', recommendation: 'Restrict the origin to specific trusted domains instead of "*".' };
+      if (val === 'null') return { name: 'Access-Control-Allow-Origin', value: val, status: 'insecure', description: 'Using "null" origin is dangerous.', recommendation: 'Use a specific domain instead of "null".' };
+      return { name: 'Access-Control-Allow-Origin', value: val, status: 'secure', description: 'CORS policy restricts access to specific domains.' };
+    }
+  },
+  {
+    name: 'Access-Control-Allow-Methods',
+    description: 'Specifies the method or methods allowed when accessing the resource.',
+    evaluate: (val: string | null): HeaderResult => {
+      if (!val) return { name: 'Access-Control-Allow-Methods', value: val, status: 'info', description: 'HTTP methods are not explicitly restricted by CORS.', recommendation: 'Explicitly allow only required methods (e.g., GET, POST).' };
+      return { name: 'Access-Control-Allow-Methods', value: val, status: 'secure', description: 'CORS allowed methods are explicitly configured.' };
+    }
+  },
+  {
+    name: 'Access-Control-Allow-Credentials',
+    description: 'Indicates whether the response to the request can be exposed when the credentials flag is true.',
+    evaluate: (val: string | null): HeaderResult => {
+      if (!val) return { name: 'Access-Control-Allow-Credentials', value: val, status: 'info', description: 'Credentials exposure is not configured.', recommendation: 'Set to "true" only if required (must not be used with Allow-Origin: *).' };
+      if (val.toLowerCase() === 'true') return { name: 'Access-Control-Allow-Credentials', value: val, status: 'warning', description: 'Allows credentials (cookies, auth headers) to be exposed to the requesting domain.', recommendation: 'Ensure Access-Control-Allow-Origin is strictly defined and NOT "*".' };
+      return { name: 'Access-Control-Allow-Credentials', value: val, status: 'secure', description: 'Credentials access is properly managed.' };
+    }
   }
 ];
 
